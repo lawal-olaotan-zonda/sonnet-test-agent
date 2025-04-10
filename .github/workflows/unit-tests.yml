@@ -110,8 +110,8 @@ jobs:
             5. Name the test file $TEST_FILE
             
             The test should be saved as $TEST_FILE
-            " --save --output-file "$TEST_FILE"
-            
+            --allowedTools " --save --output-file "$TEST_FILE" Edit
+          
             echo "Generated test file: $TEST_FILE"
           done
 

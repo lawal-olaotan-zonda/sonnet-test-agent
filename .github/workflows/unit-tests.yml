@@ -3,7 +3,7 @@ name: Generate Tests with Claude
 on:
   push:
     branches:
-      - 'ZONDA-2025-HACKATHON/UNIT-TEST-AGENT'
+      - ''
     paths:
       - 'src/**/*.tsx'
       - 'src/**/*.ts'

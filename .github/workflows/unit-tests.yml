@@ -102,15 +102,18 @@ jobs:
             mkdir -p "$(dirname "$TEST_FILE")"
             
             # Generate test using Claude CLI
+            claude -p "update the README with the latest changes" --allowedTools "Bash(git diff:*)" "Bash(git log:*)" Edit
+            claude -p "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
+
             claude -p  "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
             1. Mock all necessary dependencies
             2. Test all the component's functionality
             3. Follow the project's existing testing conventions
             4. Use the correct testing utilities from the project (like renderWithTestStore)
             5. Name the test file $TEST_FILE
-            
-            The test should be saved as $TEST_FILE
-            --allowedTools Edit --save --output-file "$TEST_FILE"
+            6. The test should be saved as $TEST_FILE." Edit
+  
+            --save --output-file "$TEST_FILE"
           
             echo "Generated test file: $TEST_FILE"
           done

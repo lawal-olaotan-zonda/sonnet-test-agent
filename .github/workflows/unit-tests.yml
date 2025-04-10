@@ -1,0 +1,142 @@
+name: Generate Tests with Claude
+
+on:
+  push:
+    branches:
+      - 'ZONDA-2025-HACKATHON/UNIT-TEST-AGENT'
+    paths:
+      - 'src/**/*.tsx'
+      - 'src/**/*.ts'
+      - '!src/**/*.spec.tsx'
+      - '!src/**/*.spec.ts'
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: 'Path to the file to generate tests for'
+        required: true
+        type: string
+
+jobs:
+  generate-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Set up Claude Auth
+        run: echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Find changed files
+        id: changed-files
+        if: github.event_name == 'push'
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -E '\.tsx?$' | grep -v '\.spec\.tsx?$' | grep -v 'node_modules' || true)
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "Changed files: $CHANGED_FILES"
+
+      - name: Set file path from input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "TARGET_FILE=${{ github.event.inputs.file_path }}" >> $GITHUB_ENV
+
+      - name: Set file paths to process
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "FILES_TO_PROCESS<<EOF" >> $GITHUB_ENV
+            echo "$CHANGED_FILES" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            echo "FILES_TO_PROCESS<<EOF" >> $GITHUB_ENV
+            echo "$TARGET_FILE" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Generate tests for each file
+        run: |
+          if [ -z "$FILES_TO_PROCESS" ]; then
+            echo "No files to process"
+            exit 0
+          fi
+          
+          # Print debug info
+          echo "Files to process:"
+          echo "$FILES_TO_PROCESS"
+          
+          echo "$FILES_TO_PROCESS" | while read -r file; do
+            if [ -z "$file" ]; then
+              continue
+            fi
+            
+            echo "Generating tests for $file"
+            
+            # Skip if file doesn't exist
+            if [ ! -f "$file" ]; then
+              echo "File $file doesn't exist, skipping"
+              continue
+            fi
+            
+            # Skip if it's already a test file
+            if [[ "$file" == *".spec."* ]]; then
+              echo "File $file is already a test file, skipping"
+              continue
+            fi
+            
+            # Determine test file path
+            TEST_FILE="${file%.*}.spec.${file##*.}"
+            
+            # Create directory for test file if it doesn't exist
+            mkdir -p "$(dirname "$TEST_FILE")"
+            
+            # Generate test using Claude CLI
+            claude-code completion "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
+            1. Mock all necessary dependencies
+            2. Test all the component's functionality
+            3. Follow the project's existing testing conventions
+            4. Use the correct testing utilities from the project (like renderWithTestStore)
+            5. Name the test file $TEST_FILE
+            
+            The test should be saved as $TEST_FILE
+            " --save --output-file "$TEST_FILE"
+            
+            echo "Generated test file: $TEST_FILE"
+          done
+
+      - name: Find generated test files
+        id: generated-tests
+        run: |
+          GENERATED_FILES=$(find . -name "*.spec.ts" -o -name "*.spec.tsx" -type f -newer .git/ORIG_HEAD | sort)
+          echo "Generated test files:"
+          echo "$GENERATED_FILES"
+          echo "GENERATED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$GENERATED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Add generated test files with Claude"
+          title: "Add generated test files with Claude"
+          body: |
+            This PR adds automatically generated test files created by Claude Code.
+            
+            Source files:
+            ${{ env.FILES_TO_PROCESS }}
+            
+            Generated test files:
+            ${{ env.GENERATED_FILES }}
+          branch: auto-generated-tests
+          base: ${{ github.ref_name }}

@@ -1,0 +1,31 @@
+{
+  "name": "sonnet-test-agent",
+  "version": "1.0.0",
+  "description": "this agent writes test cases using claude sonnet api",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lawal-olaotan-zonda/sonnet-test-agent.git"
+  },
+  "keywords": [
+    "agent",
+    "claude",
+    "sonnet"
+  ],
+  "author": "Lawal Olaotan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lawal-olaotan-zonda/sonnet-test-agent/issues"
+  },
+  "homepage": "https://github.com/lawal-olaotan-zonda/sonnet-test-agent#readme",
+  "devDependencies": {
+    "@types/node": "^22.14.0"
+  },
+  "dependencies": {
+    "https": "^1.0.0",
+    "typescript": "^5.8.3"
+  }
+}

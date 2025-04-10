@@ -32,14 +32,9 @@ jobs:
           node-version: 18
 
       - name: Install Claude CLI
-        run: |
-          curl -fsSL https://github.com/anthropics/claude-cli/releases/latest/download/claude-cli_Linux_x86_64.tar.gz -o claude-cli.tar.gz
-          tar -xzf claude-cli.tar.gz
-          chmod +x claude-code
-          sudo mv claude-code /usr/local/bin/
+        run: npm install -g @anthropic-ai/claude-code
 
-      - name: Set up Claude Auth
-        run: echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> $GITHUB_ENV
+# We'll set the ANTHROPIC_API_KEY directly in the step where it's needed
 
       - name: Find changed files
         id: changed-files
@@ -69,6 +64,8 @@ jobs:
           fi
 
       - name: Generate tests for each file
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -z "$FILES_TO_PROCESS" ]; then
             echo "No files to process"
@@ -105,7 +102,7 @@ jobs:
             mkdir -p "$(dirname "$TEST_FILE")"
             
             # Generate test using Claude CLI
-            claude-code completion "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
+            claude -p  "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
             1. Mock all necessary dependencies
             2. Test all the component's functionality
             3. Follow the project's existing testing conventions

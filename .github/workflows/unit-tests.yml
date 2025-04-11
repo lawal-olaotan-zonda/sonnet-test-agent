@@ -118,21 +118,13 @@ jobs:
             claude config set hasCompletedProjectOnboarding true
             claude config set hasTrustDialogAccepted true
 
-            claude config add allowedTools Bash
-            claude config add allowedTools Read
-            claude config add allowedTools Write
-            claude config add allowedTools Edit
-            claude config add allowedTools Create
-
             claude -p  "Please write a comprehensive unit test for the file at path: $file. The test should follow the existing testing patterns in this project. Make sure to:
             1. Mock all necessary dependencies
             2. Test all the component's functionality
             3. Follow the project's existing testing conventions
             4. Use the correct testing utilities from the project
             5. Name the test file $TEST_FILE
-            6. The test should be saved as $TEST_FILE."
-  
-            --save --output-file "$TEST_FILE"
+            6. The test should be saved as $TEST_FILE." --allowedTools "Bash(git:*),Edit,Read,Write,Create"
           
             echo "Generated test file: $TEST_FILE"
           done

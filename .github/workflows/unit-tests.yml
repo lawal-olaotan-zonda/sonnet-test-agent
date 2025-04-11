@@ -129,10 +129,6 @@ jobs:
             echo "Generated test file: $TEST_FILE"
           done
 
-      - name: Clean and save Claude test output
-        run: |
-          echo "${{ steps.call-claude.outputs.test_code }}" | awk 'BEGIN {p=0} /^```/ {p=1-p; next} p' > src/app/page.spec.tsx
-
       - name: Find generated test files
         id: generated-tests
         run: |

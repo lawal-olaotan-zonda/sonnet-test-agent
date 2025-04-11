@@ -3,7 +3,7 @@ name: Generate Tests with Claude
 on:
   push:
     branches:
-      - ''
+      - 'main'
     paths:
       - 'src/**/*.tsx'
       - 'src/**/*.ts'
@@ -45,8 +45,6 @@ jobs:
 
       - name: Install Claude CLI
         run: npm install -g @anthropic-ai/claude-code
-
-# We'll set the ANTHROPIC_API_KEY directly in the step where it's needed
 
       - name: Find changed files
         id: changed-files

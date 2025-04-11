@@ -121,7 +121,7 @@ jobs:
             3. Follow the project's existing testing conventions
             4. Use the correct testing utilities from the project
             5. Name the test file $TEST_FILE
-            6. The test should be saved as $TEST_FILE." Edit
+            6. The test should be saved as $TEST_FILE."
   
             --save --output-file "$TEST_FILE"
           

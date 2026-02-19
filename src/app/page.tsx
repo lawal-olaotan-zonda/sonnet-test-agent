@@ -16,7 +16,7 @@ async function Home({ searchParams }: { searchParams: { orderId?: string } }) {
   const orderId = searchParams.orderId;
   let orderInformation = null;
 
-  if (orderId) {
+  if (orderId && orderId.trim() !== '') {
     orderInformation = await fetchOrderNumber(orderId);
   }
 

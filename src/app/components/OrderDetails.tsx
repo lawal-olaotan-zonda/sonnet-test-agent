@@ -10,8 +10,8 @@ import { processOrder } from "./func";
 
 type OrderProps = {
         Details : {image: string,
-        size: [],
-        color: [],
+        size: string[],
+        color: string[],
         value:string
         title: string
         orderId:string
@@ -19,7 +19,7 @@ type OrderProps = {
 
 const OrderDetails: React.FC<OrderProps> = ({Details}) => {
 
-    const { image, size, color, value, title,orderId } = Details
+    const { image, size, color, value, title,orderId } = Details || {}
     const [choosedSize,setSize] = useState<string>(''); 
     const [active,setActiveColor] = useState<string>('');
     const [orderCreated,setOrderStatus] = useState<boolean>(false)
@@ -27,9 +27,15 @@ const OrderDetails: React.FC<OrderProps> = ({Details}) => {
     const router = useRouter()
 
     useEffect(()=> {
-        const currentColor = value.split(' / ')[1]
-        setActiveColor(currentColor)
+        if (value) {
+            const currentColor = value.split(' / ')[1]
+            setActiveColor(currentColor)
+        }
     },[value,Details])
+
+    if (!Details || !image || !size || !color || !value || !title || !orderId) {
+        return null;
+    }
 
     const handleRingSizeChange = (event:React.SyntheticEvent) => {
         const target = event.target as HTMLSelectElement;
@@ -45,7 +51,7 @@ const OrderDetails: React.FC<OrderProps> = ({Details}) => {
         }
         const isOrderCreated = await processOrder(orderData,'order')
 
-        if(!isOrderCreated.ok) return router.push('/')
+        if(!isOrderCreated || !isOrderCreated.ok) return router.push('/')
         setOrderStatus(true);
     }
 
@@ -55,8 +61,8 @@ const OrderDetails: React.FC<OrderProps> = ({Details}) => {
             <div className="my-6 p-8">
 
                 <div className="p-8">
-                    <h2 className="text-center font-bold text-2xl">Order Recieved </h2>
-                    <p className="text-center">Your order has been recieved and will be delivered to you soon</p>
+                    <h2 className="text-center font-bold text-2xl">Order Received </h2>
+                    <p className="text-center">Your order has been received and will be delivered to you soon</p>
                 </div>
                 
                 <div className="w-[400px] flex items-center justify-center">
